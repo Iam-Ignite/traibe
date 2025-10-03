@@ -3,6 +3,9 @@
 .env.*
 /node_modules/
 
+# Keep env.server.ts out of git if you want (optional, but recommended to commit with fallback)
+# app/lib/env.server.ts
+
 # React Router
 /.react-router/
 /build/
