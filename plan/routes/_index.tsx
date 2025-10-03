@@ -1,11 +1,12 @@
-import type { Route } from "./+types/home";
-import { Link, Form } from "react-router";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData, Link, Form, useSearchParams } from "@remix-run/react";
+import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from "react";
 import { prisma } from "~/lib/db.server";
 import { formatDate, getRelativeTime } from "~/lib/utils";
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-
+  
   const search = url.searchParams.get("search") || "";
   const filter = url.searchParams.get("filter") || "all";
 
@@ -38,20 +39,13 @@ export async function loader({ request }: Route.LoaderArgs) {
     },
   });
 
-  return { articles, categories: categories.map((c) => c.category) };
+  return json({ articles, categories: categories.map((c: { category: any; }) => c.category) });
 }
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "My Articles - Mini CMS" },
-    { name: "description", content: "Manage your blog articles" },
-  ];
-}
-
-export default function Home({ loaderData, params }: Route.ComponentProps) {
-  const { articles, categories } = loaderData;
-  const url = new URL(typeof window !== 'undefined' ? window.location.href : 'http://localhost');
-  const currentFilter = url.searchParams.get("filter") || "all";
+export default function Index() {
+  const { articles, categories } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const currentFilter = searchParams.get("filter") || "all";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,14 +66,14 @@ export default function Home({ loaderData, params }: Route.ComponentProps) {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="bg-white text-black rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Form method="get" className="flex-1">
               <input
                 type="search"
                 name="search"
                 placeholder="Filter by title or category..."
-                defaultValue={url.searchParams.get("search") || ""}
+                defaultValue={searchParams.get("search") || ""}
                 className="input-field"
               />
             </Form>
@@ -95,7 +89,7 @@ export default function Home({ loaderData, params }: Route.ComponentProps) {
               >
                 All
               </Link>
-              {categories.map((cat) => (
+              {categories.map((cat:any) => (
                 <Link
                   key={cat}
                   to={`/?filter=${encodeURIComponent(cat)}`}
@@ -143,7 +137,7 @@ export default function Home({ loaderData, params }: Route.ComponentProps) {
                     </td>
                   </tr>
                 ) : (
-                  articles.map((article) => (
+                  articles.map((article: { id: Key | null | undefined; title: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; children: string | any[]; category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; createdAt: string | Date; updatedAt: string | Date; }) => (
                     <tr key={article.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
