@@ -1,14 +1,15 @@
 import { PrismaClient } from "@prisma/client";
-import { DATABASE_URL } from "./env.server";
+
+// Hardcoded DATABASE_URL - fallback if env var is not set
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  "postgresql://postgres:jWaanlnE6Vi42J6u@db.qzvazvvpjzcspxohcgqz.supabase.co:5432/postgres";
 
 let prisma: PrismaClient;
 
 declare global {
   var __db__: PrismaClient;
 }
-
-// Set the DATABASE_URL for Prisma
-process.env.DATABASE_URL = DATABASE_URL;
 
 // this is needed because in development we don't want to restart
 // the server with every change, but we want to make sure we don't
